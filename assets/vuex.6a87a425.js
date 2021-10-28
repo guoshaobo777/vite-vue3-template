@@ -1,0 +1,1 @@
+import{_ as t}from"./index.59e0eba1.js";import{d as o,g as n,a,h as s,w as r,o as c,k as p}from"./vendor.4836b86a.js";const _=o({setup(){}}),d=p("Home");function i(m,l,u,f,x,v){const e=n("el-button");return c(),a("div",null,[s(e,{type:"primary"},{default:r(()=>[d]),_:1})])}var $=t(_,[["render",i]]);export{$ as default};
