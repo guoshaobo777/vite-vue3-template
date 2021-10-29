@@ -4,6 +4,7 @@
     <p>count is: {{ count }}</p>
     <button @click="increment">increment</button>
     测试测试20211029
+    <button @click="increment">increment 第二次测试！！！</button>
   </div>
 </template>
 
