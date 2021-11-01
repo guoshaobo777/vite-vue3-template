@@ -1,29 +1,42 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-// path模块找不到可以安装@type/node --> npm i @types/node -D
-import { resolve } from 'path'
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src') // 设置'@'指向'src'
-    }
-  },
-  base: './', // 设置打包路径
-  server: {
-    port: 4000, // 设置服务启动端口号
-    open: true, // 设置服务启动是否自动打开浏览器
-    cors: true // 允许跨域
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import type { UserConfig } from 'vite';
+import { loadEnv } from './src/utils/viteBuild';
 
-    // 设置代理，根据项目实际情况配置
-    // proxy: {
-    //   '/api': {
-    //     target: 'http://xxx.xxx.xxx.xxx:8000',
-    //     changeOrigin: true,
-    //     secure: false,
-    //     rewrite: (path) => path.replace('/api/', '/'),
-    //   },
-    // },
-  }
-})
+const pathResolve = (dir: string): any => {
+	return resolve(__dirname, '.', dir);
+};
+
+const { VITE_PORT, VITE_OPEN, VITE_PUBLIC_PATH } = loadEnv();
+
+const alias: Record<string, string> = {
+	'/@': pathResolve('./src/'),
+};
+
+const viteConfig: UserConfig = {
+	plugins: [vue()],
+	root: process.cwd(),
+	resolve: { alias },
+	base: process.env.NODE_ENV === 'production' ? VITE_PUBLIC_PATH : './',
+	server: {
+		host: '0.0.0.0',
+		port: VITE_PORT,
+		open: VITE_OPEN,
+		proxy: {
+			'/gitee': {
+				target: 'https://gitee.com',
+				ws: true,
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/gitee/, ''),
+			},
+		},
+	},
+	build: {
+		outDir: 'dist',
+		minify: 'esbuild',
+		sourcemap: false,
+		chunkSizeWarningLimit: 1500,
+	},
+};
+
+export default viteConfig;

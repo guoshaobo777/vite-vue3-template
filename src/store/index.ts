@@ -1,27 +1,27 @@
-import { createStore } from 'vuex'
+import { InjectionKey } from 'vue';
+import { createStore, useStore as baseUseStore, Store } from 'vuex';
+import { RootStateTypes } from '/@/store/interface/index';
 
-const defaultState = {
-  count: 0
+// Vite supports importing multiple modules from the file system using the special import.meta.glob function
+// see https://cn.vitejs.dev/guide/features.html#glob-import
+const modulesFiles = import.meta.globEager('./modules/*.ts');
+const pathList: string[] = [];
+
+for (const path in modulesFiles) {
+	pathList.push(path);
 }
 
-// Create a new store instance
-export default createStore({
-  state() {
-    return defaultState
-  },
-  mutations: {
-    increment(state: typeof defaultState) {
-      state.count += 1
-    }
-  },
-  actions: {
-    increment(context) {
-      context.commit('increment')
-    }
-  },
-  getters: {
-    double(state: typeof defaultState) {
-      return 2 * state.count
-    }
-  }
-})
+const modules = pathList.reduce((modules: { [x: string]: any }, modulePath: string) => {
+	const moduleName = modulePath.replace(/^\.\/modules\/(.*)\.\w+$/, '$1');
+	const value = modulesFiles[modulePath];
+	modules[moduleName] = value.default;
+	return modules;
+}, {});
+
+export const key: InjectionKey<Store<RootStateTypes>> = Symbol();
+
+export const store = createStore<RootStateTypes>({ modules });
+
+export function useStore() {
+	return baseUseStore(key);
+}
